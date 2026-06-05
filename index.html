@@ -686,7 +686,7 @@ function statsNext(){ statsMonth++; if(statsMonth>12){statsMonth=1;statsYear++};
 function renderStats(){
   document.getElementById('stats-title').textContent = `${statsYear}年${statsMonth}月 收入统计`
   const prefix = `${statsYear}-${String(statsMonth).padStart(2,'0')}`
-  const bs = getBookings().filter(b=>b.checkIn&&b.checkIn.startsWith(prefix)&&(b.status==='checkedin'||b.status==='checkedout'))
+  const bs = getBookings().filter(b=>b.checkIn&&b.checkIn.startsWith(prefix)&&(b.status==='checkedin'||b.status==='checkedout'||b.status==='booked'))
   let total=0, count=0, typeIncome={泳池房:0,标准间:0}, roomIncome={}
   bs.forEach(b=>{ const a=parseFloat(b.amount)||0; total+=a; count++; if(b.roomType) typeIncome[b.roomType]=(typeIncome[b.roomType]||0)+a; if(b.roomId) roomIncome[b.roomId]=(roomIncome[b.roomId]||0)+a })
 
