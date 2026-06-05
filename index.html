@@ -468,7 +468,7 @@ select.input{-webkit-appearance:none;text-align:right}
     <div class="card" style="padding:0 16px">
       <div class="form-row">
         <span class="label">房间</span>
-        <select class="input" id="f-room">
+        <select class="input" id="f-room" onchange="var r=ROOM_MAP[this.value];if(r)document.getElementById('f-amount').value=r.price">
           <option value="">请选择</option>
           <option value="101">101房（泳池房）</option>
           <option value="102">102房（泳池房）</option>
