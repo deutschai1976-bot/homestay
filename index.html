@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)file:///Users/paul/Downloads/index.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="民宿管理">
+<title>民宿管理系统</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;background:#f5f7fa;color:#222;min-height:100vh;padding-bottom:70px}
+/* Tab Bar */
+.tabbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 6px;font-size:11px;color:#999;cursor:pointer;gap:3px;transition:color .2s}
+.tab.active{color:#2c7a7b}
+.tab svg{width:22px;height:22px;stroke-width:1.8;fill:none;stroke:currentColor}
+/* Pages */
+.page{display:none;padding:16px}
+.page.active{display:block}
+/* Cards */
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.section-title{font-size:15px;font-weight:600;color:#222;margin-bottom:14px}
+/* Month Nav */
+.month-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.nav-btn{font-size:28px;color:#2c7a7b;padding:0 12px;line-height:1;cursor:pointer;user-select:none}
+.month-title{font-size:17px;font-weight:700}
+/* Calendar */
+.week-header{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:4px}
+.week-cell{font-size:11px;color:#aaa;padding:4px 0}
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.day-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;padding:2px;background:#f9fbfc}
+.day-cell.empty-cell{background:transparent;cursor:default}
+.day-cell.today .day-num{color:#2c7a7b;font-weight:700}
+.day-cell.selected{background:#2c7a7b}
+.day-cell.selected .day-num,.day-cell.selected .ds{color:#fff!important;background:transparent!important}
+.day-num{font-size:13px;color:#333;font-weight:500;line-height:1}
+.day-dots{display:flex;gap:2px;margin-top:2px;flex-wrap:wrap;justify-content:center}
+.ds{font-size:9px;border-radius:4px;padding:1px 3px}
+.ds-e{color:#2e7d32;background:#e8f5e9}
+.ds-o{color:#1565c0;background:#e3f2fd}
+/* Detail panel */
+.detail-panel{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.dp-date{font-size:15px;font-weight:600}
+.dp-close{font-size:20px;color:#aaa;cursor:pointer;padding:0 4px}
+.room-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f5f5f5;cursor:pointer}
+.room-row:last-child{border-bottom:none}
+.rr-left{display:flex;flex-direction:column;gap:2px}
+.rr-name{font-size:14px;font-weight:600}
+.rr-type{font-size:11px;color:#999}
+.rr-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.rr-guest{font-size:12px;color:#555}
+.rr-amount{font-size:14px;color:#2c7a7b;font-weight:600}
+.rr-hint{font-size:11px;color:#ccc}
+/* Status tags */
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.tag-empty{background:#e8f5e9;color:#2e7d32}
+.tag-booked{background:#fff3e0;color:#e65100}
+.tag-checkedin{background:#e3f2fd;color:#1565c0}
+.tag-checkedout{background:#f3e5f5;color:#6a1b9a}
+.tag-repair{background:#fce4ec;color:#880e4f}
+/* Forms */
+.form-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #f5f5f5}
+.form-row:last-child{border-bottom:none}
+.label{font-size:14px;color:#555;width:80px;flex-shrink:0}
+.input{flex:1;font-size:14px;color:#222;border:none;outline:none;background:transparent;text-align:right}
+.input::placeholder{color:#ccc}
+select.input{-webkit-appearance:none;text-align:right}
+.nights-badge{text-align:center;font-size:12px;color:#2c7a7b;background:#e0f2f1;padding:6px;border-radius:8px;margin:6px 0}
+.btn-group{display:flex;gap:12px;margin-top:16px}
+.btn{flex:1;padding:13px;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer;text-align:center}
+.btn-primary{background:#2c7a7b;color:#fff}
+.btn-danger{background:#e53e3e;color:#fff}
+.btn-outline{background:#fff;color:#2c7a7b;border:1.5px solid #2c7a7b}
+/* Booking list */
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.page-title{font-size:22px;font-weight:800}
+.bi{padding:14px;margin-bottom:12px}
+.bi-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.bi-room{font-size:14px;font-weight:600}
+.bi-meta{display:flex;gap:12px;align-items:center;margin-bottom:6px}
+.bi-name{font-size:13px;color:#444;font-weight:500}
+.bi-phone{font-size:12px;color:#aaa}
+.bi-dates{font-size:12px;color:#999;margin-bottom:8px}
+.bi-footer{display:flex;justify-content:space-between;align-items:center}
+.bi-channel{font-size:11px;color:#aaa;background:#f5f5f5;padding:3px 10px;border-radius:6px}
+.bi-amount{font-size:17px;font-weight:700;color:#2c7a7b}
+.empty-tip{text-align:center;padding:60px 0;color:#bbb;font-size:14px}
+/* Stats */
+.overview-card{background:linear-gradient(135deg,#2c7a7b,#38a169);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
+.ov-row{display:flex;justify-content:space-around;padding-bottom:16px}
+.ov-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ov-num{font-size:26px;font-weight:800;color:#fff}
+.ov-label{font-size:12px;color:rgba(255,255,255,.8)}
+.ov-divider{width:1px;background:rgba(255,255,255,.3)}
+.type-row{display:flex;border-top:1px solid rgba(255,255,255,.2);padding-top:14px}
+.type-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.type-label{font-size:12px;color:rgba(255,255,255,.8)}
+.type-amount{font-size:18px;font-weight:700;color:#fff}
+.room-table{width:100%}
+.t-header,.t-row{display:flex;align-items:center;padding:10px 0}
+.t-header{border-bottom:1.5px solid #eee}
+.t-header span{font-size:11px;color:#aaa;font-weight:500}
+.t-row{border-bottom:1px solid #f9f9f9}
+.t-row:last-child{border-bottom:none}
+.col-r{flex:2;font-size:14px;color:#333;font-weight:500}
+.col-c{flex:2;font-size:13px;color:#888;text-align:center}
+.col-i{flex:3;font-size:13px;color:#aaa;text-align:right}
+.col-i.income-val{color:#2c7a7b;font-weight:600;font-size:14px}
+/* Rooms page */
+.floor-label{font-size:13px;font-weight:600;color:#777;margin-bottom:10px;padding-left:2px}
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.rc{border-radius:16px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
+.rc-s-empty{background:#e8f5e9;border:1.5px solid #a5d6a7}
+.rc-s-booked{background:#fff8e1;border:1.5px solid #ffd54f}
+.rc-s-checkedin{background:#e3f2fd;border:1.5px solid #90caf9}
+.rc-s-checkedout{background:#f3e5f5;border:1.5px solid #ce93d8}
+.rc-s-repair{background:#fce4ec;border:1.5px solid #f48fb1}
+.rc-num{font-size:22px;font-weight:800;color:#333}
+.rc-type{font-size:10px;color:#999}
+.rc-status{font-size:12px;font-weight:600;color:#444}
+.rc-guest{font-size:10px;color:#666;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-price{font-size:10px;color:#2c7a7b;font-weight:500}
+.legend-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.lc{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500;color:#333}
+/* Modal overlay */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:17px;font-weight:700}
+.modal-close{font-size:22px;color:#aaa;cursor:pointer;padding:0 4px}
+</style>
+</head>
+<body>
+
+<!-- Pages -->
+<div id="p-calendar" class="page active">
+  <div class="card month-nav" style="padding:12px 16px;margin-bottom:12px">
+    <div class="nav-btn" onclick="calPrev()">‹</div>
+    <div class="month-title" id="cal-title">2026年6月</div>
+    <div class="nav-btn" onclick="calNext()">›</div>
+  </div>
+  <div class="card" style="padding:12px">
+    <div class="week-header">
+      <div class="week-cell">一</div><div class="week-cell">二</div><div class="week-cell">三</div>
+      <div class="week-cell">四</div><div class="week-cell">五</div><div class="week-cell">六</div>
+      <div class="week-cell">日</div>
+    </div>
+    <div class="day-grid" id="day-grid"><div class="day-cell" onclick="selectDay(&#39;2026-06-01&#39;)">
+      <span class="day-num">1</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-02&#39;)">
+      <span class="day-num">2</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-03&#39;)">
+      <span class="day-num">3</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-04&#39;)">
+      <span class="day-num">4</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell today" onclick="selectDay(&#39;2026-06-05&#39;)">
+      <span class="day-num">5</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-06&#39;)">
+      <span class="day-num">6</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-07&#39;)">
+      <span class="day-num">7</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-08&#39;)">
+      <span class="day-num">8</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-09&#39;)">
+      <span class="day-num">9</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-10&#39;)">
+      <span class="day-num">10</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-11&#39;)">
+      <span class="day-num">11</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-12&#39;)">
+      <span class="day-num">12</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-13&#39;)">
+      <span class="day-num">13</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-14&#39;)">
+      <span class="day-num">14</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-15&#39;)">
+      <span class="day-num">15</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-16&#39;)">
+      <span class="day-num">16</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-17&#39;)">
+      <span class="day-num">17</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-18&#39;)">
+      <span class="day-num">18</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-19&#39;)">
+      <span class="day-num">19</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-20&#39;)">
+      <span class="day-num">20</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-21&#39;)">
+      <span class="day-num">21</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-22&#39;)">
+      <span class="day-num">22</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-23&#39;)">
+      <span class="day-num">23</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-24&#39;)">
+      <span class="day-num">24</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-25&#39;)">
+      <span class="day-num">25</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-26&#39;)">
+      <span class="day-num">26</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-27&#39;)">
+      <span class="day-num">27</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-28&#39;)">
+      <span class="day-num">28</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-29&#39;)">
+      <span class="day-num">29</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div><div class="day-cell" onclick="selectDay(&#39;2026-06-30&#39;)">
+      <span class="day-num">30</span>
+      <div class="day-dots">
+        <span class="ds ds-e">7空</span>
+        
+      </div>
+    </div></div>
+  </div>
+  <div id="cal-detail"></div>
+</div>
+
+<div id="p-booking" class="page">
+  <div class="top-bar">
+    <div class="page-title">预订记录</div>
+    <button class="btn btn-primary" style="flex:0;padding:8px 18px;font-size:13px" onclick="openBookingForm()">+ 新建</button>
+  </div>
+  <div id="booking-list"></div>
+</div>
+
+<div id="p-stats" class="page">
+  <div class="card month-nav" style="padding:12px 16px;margin-bottom:12px">
+    <div class="nav-btn" onclick="statsPrev()">‹</div>
+    <div class="month-title" id="stats-title">2026年6月 收入统计</div>
+    <div class="nav-btn" onclick="statsNext()">›</div>
+  </div>
+  <div id="stats-content">
+    <div class="overview-card">
+      <div class="ov-row">
+        <div class="ov-item"><span class="ov-num">¥ 0</span><span class="ov-label">本月总收入</span></div>
+        <div class="ov-divider"></div>
+        <div class="ov-item"><span class="ov-num">0</span><span class="ov-label">开房间次</span></div>
+      </div>
+      <div class="type-row">
+        <div class="type-item"><span class="type-label">🏊 泳池房</span><span class="type-amount">¥ 0</span></div>
+        <div class="type-item"><span class="type-label">🛏 标准间</span><span class="type-amount">¥ 0</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">🏊 1楼泳池房</div>
+      <div class="room-table">
+        <div class="t-header"><span class="col-r">房间</span><span class="col-c">次数</span><span class="col-i">收入</span></div>
+        <div class="t-row"><span class="col-r">101房</span><span class="col-c">0 次</span><span class="col-i income-val">¥ 0</span></div><div class="t-row"><span class="col-r">102房</span><span class="col-c">0 次</span><span class="col-i income-val">¥ 0</span></div><div class="t-row"><span class="col-r">103房</span><span class="col-c">0 次</span><span class="col-i income-val">¥ 0</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">🛏 2楼标准间</div>
+      <div class="room-table">
+        <div class="t-header"><span class="col-r">房间</span><span class="col-c">次数</span><span class="col-i">收入</span></div>
+        <div class="t-row"><span class="col-r">201房</span><span class="col-c">0 次</span><span class="col-i income-val">¥ 0</span></div><div class="t-row"><span class="col-r">202房</span><span class="col-c">0 次</span><span class="col-i income-val">¥ 0</span></div><div class="t-row"><span class="col-r">203房</span><span class="col-c">0 次</span><span class="col-i income-val">¥ 0</span></div><div class="t-row"><span class="col-r">204房</span><span class="col-c">0 次</span><span class="col-i income-val">¥ 0</span></div>
+      </div>
+    </div>
+    <div style="text-align:center;color:#ccc;font-size:12px;padding:8px 0 24px">📸 长按截图可分享统计</div></div>
+</div>
+
+<div id="p-rooms" class="page">
+  <div style="font-size:22px;font-weight:800;margin-bottom:4px">房型总览</div>
+  <div style="font-size:12px;color:#aaa;margin-bottom:16px" id="rooms-date">今日 (2026-06-05) 实时状态</div>
+  <div id="rooms-content">
+    <div class="floor-label">🏊 1楼 · 泳池房</div>
+    <div class="room-grid"><div class="rc rc-s-empty" onclick="onRoomTap(&#39;101&#39;,&#39;empty&#39;,&#39;&#39;)">
+      <span class="rc-num">101</span>
+      <span class="rc-type">泳池房</span>
+      <span class="rc-status">空房</span>
+      
+      <span class="rc-price">¥688/晚</span>
+    </div><div class="rc rc-s-empty" onclick="onRoomTap(&#39;102&#39;,&#39;empty&#39;,&#39;&#39;)">
+      <span class="rc-num">102</span>
+      <span class="rc-type">泳池房</span>
+      <span class="rc-status">空房</span>
+      
+      <span class="rc-price">¥688/晚</span>
+    </div><div class="rc rc-s-empty" onclick="onRoomTap(&#39;103&#39;,&#39;empty&#39;,&#39;&#39;)">
+      <span class="rc-num">103</span>
+      <span class="rc-type">泳池房</span>
+      <span class="rc-status">空房</span>
+      
+      <span class="rc-price">¥688/晚</span>
+    </div></div>
+    <div class="floor-label">🛏 2楼 · 标准间</div>
+    <div class="room-grid"><div class="rc rc-s-empty" onclick="onRoomTap(&#39;201&#39;,&#39;empty&#39;,&#39;&#39;)">
+      <span class="rc-num">201</span>
+      <span class="rc-type">标准间</span>
+      <span class="rc-status">空房</span>
+      
+      <span class="rc-price">¥388/晚</span>
+    </div><div class="rc rc-s-empty" onclick="onRoomTap(&#39;202&#39;,&#39;empty&#39;,&#39;&#39;)">
+      <span class="rc-num">202</span>
+      <span class="rc-type">标准间</span>
+      <span class="rc-status">空房</span>
+      
+      <span class="rc-price">¥388/晚</span>
+    </div><div class="rc rc-s-empty" onclick="onRoomTap(&#39;203&#39;,&#39;empty&#39;,&#39;&#39;)">
+      <span class="rc-num">203</span>
+      <span class="rc-type">标准间</span>
+      <span class="rc-status">空房</span>
+      
+      <span class="rc-price">¥388/晚</span>
+    </div><div class="rc rc-s-empty" onclick="onRoomTap(&#39;204&#39;,&#39;empty&#39;,&#39;&#39;)">
+      <span class="rc-num">204</span>
+      <span class="rc-type">标准间</span>
+      <span class="rc-status">空房</span>
+      
+      <span class="rc-price">¥388/晚</span>
+    </div></div></div>
+  <div class="card">
+    <div class="legend-wrap">
+      <div class="lc rc-s-empty">空房</div>
+      <div class="lc rc-s-booked">已预订</div>
+      <div class="lc rc-s-checkedin">入住中</div>
+      <div class="lc rc-s-checkedout">已退房</div>
+      <div class="lc rc-s-repair">维修</div>
+    </div>
+    <div style="font-size:11px;color:#ccc">点击房间可登记或查看预订</div>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tabbar">
+  <div class="tab active" onclick="switchTab(&#39;calendar&#39;,0)" id="tab-0">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    日历
+  </div>
+  <div class="tab" onclick="switchTab(&#39;booking&#39;,1)" id="tab-1">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+    预订
+  </div>
+  <div class="tab" onclick="switchTab(&#39;stats&#39;,2)" id="tab-2">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+    统计
+  </div>
+  <div class="tab" onclick="switchTab(&#39;rooms&#39;,3)" id="tab-3">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    房型
+  </div>
+</div>
+
+<!-- Booking Form Modal -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">新建预订</div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="card" style="padding:0 16px">
+      <div class="form-row">
+        <span class="label">房间</span>
+        <select class="input" id="f-room">
+          <option value="">请选择</option>
+          <option value="101">101房（泳池房）</option>
+          <option value="102">102房（泳池房）</option>
+          <option value="103">103房（泳池房）</option>
+          <option value="201">201房（标准间）</option>
+          <option value="202">202房（标准间）</option>
+          <option value="203">203房（标准间）</option>
+          <option value="204">204房（标准间）</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <span class="label">客人姓名</span>
+        <input class="input" id="f-guest" placeholder="请输入" type="text">
+      </div>
+      <div class="form-row">
+        <span class="label">联系电话</span>
+        <input class="input" id="f-phone" placeholder="选填" type="tel">
+      </div>
+      <div class="form-row">
+        <span class="label">入住日期</span>
+        <input class="input" id="f-checkin" type="date">
+      </div>
+      <div class="form-row">
+        <span class="label">退房日期</span>
+        <input class="input" id="f-checkout" type="date" onchange="updateNights()">
+      </div>
+      <div id="nights-badge"></div>
+      <div class="form-row">
+        <span class="label">金额 ¥</span>
+        <input class="input" id="f-amount" placeholder="0" type="number">
+      </div>
+      <div class="form-row">
+        <span class="label">渠道</span>
+        <input class="input" id="f-channel" placeholder="微信/现金/OTA（选填）">
+      </div>
+      <div class="form-row">
+        <span class="label">状态</span>
+        <select class="input" id="f-status">
+          <option value="checkedin">已入住</option>
+          <option value="booked">已预订（未入住）</option>
+          <option value="checkedout">已退房</option>
+          <option value="repair">维修/不可用</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <span class="label">备注</span>
+        <input class="input" id="f-remark" placeholder="选填">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveBooking()">保存</button>
+      <button class="btn btn-danger" id="btn-delete" style="display:none" onclick="deleteBooking()">删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+const ROOMS = [
+  {id:'101',name:'101房',floor:1,type:'泳池房',price:688},
+  {id:'102',name:'102房',floor:1,type:'泳池房',price:688},
+  {id:'103',name:'103房',floor:1,type:'泳池房',price:688},
+  {id:'201',name:'201房',floor:2,type:'标准间',price:388},
+  {id:'202',name:'202房',floor:2,type:'标准间',price:388},
+  {id:'203',name:'203房',floor:2,type:'标准间',price:388},
+  {id:'204',name:'204房',floor:2,type:'标准间',price:388},
+]
+const STATUS_LABEL = {empty:'空房',booked:'已预订',checkedin:'入住中',checkedout:'已退房',repair:'维修'}
+const ROOM_MAP = {}
+ROOMS.forEach(r => ROOM_MAP[r.id] = r)
+
+function getBookings(){ return JSON.parse(localStorage.getItem('bookings')||'[]') }
+function saveBookings(b){ localStorage.setItem('bookings',JSON.stringify(b)) }
+
+function formatDate(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0')
+  return `${y}-${m}-${day}`
+}
+function today(){ return formatDate(new Date()) }
+function dayDiff(d1,d2){ return Math.round((new Date(d2)-new Date(d1))/86400000) }
+
+function roomStatusOn(roomId, dateStr){
+  const bs = getBookings()
+  const b = bs.find(b => b.roomId===roomId && dateStr>=b.checkIn && dateStr<b.checkOut)
+  if(!b) return {status:'empty',booking:null}
+  return {status:b.status, booking:b}
+}
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+const PAGES = ['calendar','booking','stats','rooms']
+function switchTab(name, idx){
+  PAGES.forEach((p,i)=>{
+    document.getElementById('p-'+p).classList.toggle('active', p===name)
+    document.getElementById('tab-'+i).classList.toggle('active', i===idx)
+  })
+  if(name==='booking') renderBookingList()
+  if(name==='stats') renderStats()
+  if(name==='rooms') renderRooms()
+}
+
+// ─── Calendar ────────────────────────────────────────────────────────────────
+let calYear, calMonth, selDate = null
+;(function(){
+  const now = new Date()
+  calYear = now.getFullYear(); calMonth = now.getMonth()+1
+})()
+
+function calPrev(){ calMonth--; if(calMonth<1){calMonth=12;calYear--}; selDate=null; renderCal() }
+function calNext(){ calMonth++; if(calMonth>12){calMonth=1;calYear++}; selDate=null; renderCal() }
+
+function renderCal(){
+  document.getElementById('cal-title').textContent = `${calYear}年${calMonth}月`
+  const firstDay = new Date(calYear, calMonth-1, 1)
+  const totalDays = new Date(calYear, calMonth, 0).getDate()
+  let startWd = firstDay.getDay(); if(startWd===0) startWd=7; startWd--
+
+  let html = ''
+  for(let i=0;i<startWd;i++) html += '<div class="day-cell empty-cell"></div>'
+
+  const t = today()
+  for(let d=1;d<=totalDays;d++){
+    const ds = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    let empty=0, occ=0
+    ROOMS.forEach(r=>{ const {status}=roomStatusOn(r.id,ds); status==='empty'?empty++:occ++ })
+    const isToday = ds===t ? ' today' : ''
+    const isSel = ds===selDate ? ' selected' : ''
+    html += `<div class="day-cell${isToday}${isSel}" onclick="selectDay('${ds}')">
+      <span class="day-num">${d}</span>
+      <div class="day-dots">
+        ${empty>0?`<span class="ds ds-e">${empty}空</span>`:''}
+        ${occ>0?`<span class="ds ds-o">${occ}住</span>`:''}
+      </div>
+    </div>`
+  }
+  document.getElementById('day-grid').innerHTML = html
+  renderDayDetail()
+}
+
+function selectDay(ds){
+  selDate = selDate===ds ? null : ds
+  renderCal()
+}
+
+function renderDayDetail(){
+  const el = document.getElementById('cal-detail')
+  if(!selDate){ el.innerHTML=''; return }
+  let rows = ''
+  ROOMS.forEach(r=>{
+    const {status, booking} = roomStatusOn(r.id, selDate)
+    const tag = `<span class="tag tag-${status}">${STATUS_LABEL[status]}</span>`
+    const right = booking
+      ? `${tag}<span class="rr-guest">${booking.guestName}</span><span class="rr-amount">¥${booking.amount}</span>`
+      : `${tag}<span class="rr-hint">点击登记 →</span>`
+    const bid = booking ? booking.id : ''
+    rows += `<div class="room-row" onclick="onRoomTap('${r.id}','${status}','${bid}')">
+      <div class="rr-left"><span class="rr-name">${r.name}</span><span class="rr-type">${r.type}</span></div>
+      <div class="rr-right">${right}</div>
+    </div>`
+  })
+  el.innerHTML = `<div class="detail-panel">
+    <div class="dp-header">
+      <span class="dp-date">${selDate} 房间状态</span>
+      <span class="dp-close" onclick="selDate=null;renderCal()">✕</span>
+    </div>
+    ${rows}
+  </div>`
+}
+
+function onRoomTap(roomId, status, bookingId){
+  if(status==='empty'){
+    openBookingForm(null, roomId, selDate)
+  } else if(bookingId){
+    const b = getBookings().find(x=>x.id===bookingId)
+    if(b) openBookingForm(b)
+  }
+}
+
+// ─── Booking List ─────────────────────────────────────────────────────────────
+function renderBookingList(){
+  const bs = getBookings().sort((a,b)=>b.checkIn>a.checkIn?1:-1)
+  if(!bs.length){ document.getElementById('booking-list').innerHTML='<div class="empty-tip">暂无预订记录<br>点右上角 + 新建</div>'; return }
+  let html = ''
+  bs.forEach(b=>{
+    html += `<div class="card bi" onclick='editBooking(${JSON.stringify(b.id)})'>
+      <div class="bi-header">
+        <span class="bi-room">${b.roomName} · ${b.roomType||''}</span>
+        <span class="tag tag-${b.status}">${STATUS_LABEL[b.status]||b.status}</span>
+      </div>
+      <div class="bi-meta">
+        <span class="bi-name">${b.guestName}</span>
+        ${b.phone?`<span class="bi-phone">${b.phone}</span>`:''}
+      </div>
+      <div class="bi-dates">${b.checkIn} → ${b.checkOut}</div>
+      <div class="bi-footer">
+        <span class="bi-channel">${b.channel||'—'}</span>
+        <span class="bi-amount">¥ ${b.amount||0}</span>
+      </div>
+    </div>`
+  })
+  document.getElementById('booking-list').innerHTML = html
+}
+
+function editBooking(id){
+  const b = getBookings().find(x=>x.id===id)
+  if(b) openBookingForm(b)
+}
+
+// ─── Stats ───────────────────────────────────────────────────────────────────
+let statsYear, statsMonth
+;(function(){ const n=new Date(); statsYear=n.getFullYear(); statsMonth=n.getMonth()+1 })()
+
+function statsPrev(){ statsMonth--; if(statsMonth<1){statsMonth=12;statsYear--}; renderStats() }
+function statsNext(){ statsMonth++; if(statsMonth>12){statsMonth=1;statsYear++}; renderStats() }
+
+function renderStats(){
+  document.getElementById('stats-title').textContent = `${statsYear}年${statsMonth}月 收入统计`
+  const prefix = `${statsYear}-${String(statsMonth).padStart(2,'0')}`
+  const bs = getBookings().filter(b=>b.checkIn&&b.checkIn.startsWith(prefix)&&(b.status==='checkedin'||b.status==='checkedout'))
+  let total=0, count=0, typeIncome={泳池房:0,标准间:0}, roomIncome={}
+  bs.forEach(b=>{ const a=parseFloat(b.amount)||0; total+=a; count++; if(b.roomType) typeIncome[b.roomType]=(typeIncome[b.roomType]||0)+a; if(b.roomId) roomIncome[b.roomId]=(roomIncome[b.roomId]||0)+a })
+
+  const floor1 = ROOMS.filter(r=>r.floor===1).map(r=>({...r,income:roomIncome[r.id]||0,count:bs.filter(b=>b.roomId===r.id).length}))
+  const floor2 = ROOMS.filter(r=>r.floor===2).map(r=>({...r,income:roomIncome[r.id]||0,count:bs.filter(b=>b.roomId===r.id).length}))
+
+  const tableRows = rs => rs.map(r=>`<div class="t-row"><span class="col-r">${r.name}</span><span class="col-c">${r.count} 次</span><span class="col-i income-val">¥ ${r.income}</span></div>`).join('')
+
+  document.getElementById('stats-content').innerHTML = `
+    <div class="overview-card">
+      <div class="ov-row">
+        <div class="ov-item"><span class="ov-num">¥ ${total}</span><span class="ov-label">本月总收入</span></div>
+        <div class="ov-divider"></div>
+        <div class="ov-item"><span class="ov-num">${count}</span><span class="ov-label">开房间次</span></div>
+      </div>
+      <div class="type-row">
+        <div class="type-item"><span class="type-label">🏊 泳池房</span><span class="type-amount">¥ ${typeIncome['泳池房']}</span></div>
+        <div class="type-item"><span class="type-label">🛏 标准间</span><span class="type-amount">¥ ${typeIncome['标准间']}</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">🏊 1楼泳池房</div>
+      <div class="room-table">
+        <div class="t-header"><span class="col-r">房间</span><span class="col-c">次数</span><span class="col-i">收入</span></div>
+        ${tableRows(floor1)}
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">🛏 2楼标准间</div>
+      <div class="room-table">
+        <div class="t-header"><span class="col-r">房间</span><span class="col-c">次数</span><span class="col-i">收入</span></div>
+        ${tableRows(floor2)}
+      </div>
+    </div>
+    <div style="text-align:center;color:#ccc;font-size:12px;padding:8px 0 24px">📸 长按截图可分享统计</div>`
+}
+
+// ─── Rooms ───────────────────────────────────────────────────────────────────
+function renderRooms(){
+  const t = today()
+  document.getElementById('rooms-date').textContent = `今日 (${t}) 实时状态`
+  const floor1 = ROOMS.filter(r=>r.floor===1)
+  const floor2 = ROOMS.filter(r=>r.floor===2)
+
+  const cards = rs => rs.map(r=>{
+    const {status,booking} = roomStatusOn(r.id, t)
+    const bid = booking ? booking.id : ''
+    return `<div class="rc rc-s-${status}" onclick="onRoomTap('${r.id}','${status}','${bid}')">
+      <span class="rc-num">${r.id}</span>
+      <span class="rc-type">${r.type}</span>
+      <span class="rc-status">${STATUS_LABEL[status]}</span>
+      ${booking?`<span class="rc-guest">${booking.guestName}</span>`:''}
+      <span class="rc-price">¥${r.price}/晚</span>
+    </div>`
+  }).join('')
+
+  document.getElementById('rooms-content').innerHTML = `
+    <div class="floor-label">🏊 1楼 · 泳池房</div>
+    <div class="room-grid">${cards(floor1)}</div>
+    <div class="floor-label">🛏 2楼 · 标准间</div>
+    <div class="room-grid">${cards(floor2)}</div>`
+}
+
+// ─── Booking Form ─────────────────────────────────────────────────────────────
+let editingId = null
+
+function openBookingForm(booking, roomId, checkIn){
+  editingId = booking ? booking.id : null
+  document.getElementById('modal-title').textContent = booking ? '编辑预订' : '新建预订'
+  document.getElementById('btn-delete').style.display = booking ? 'block' : 'none'
+
+  document.getElementById('f-room').value = booking ? booking.roomId : (roomId||'')
+  document.getElementById('f-guest').value = booking ? booking.guestName : ''
+  document.getElementById('f-phone').value = booking ? (booking.phone||'') : ''
+  document.getElementById('f-checkin').value = booking ? booking.checkIn : (checkIn||today())
+  document.getElementById('f-checkout').value = booking ? booking.checkOut : ''
+  document.getElementById('f-amount').value = booking ? booking.amount : (roomId ? ROOM_MAP[roomId]?.price||'' : '')
+  document.getElementById('f-channel').value = booking ? (booking.channel||'') : ''
+  document.getElementById('f-status').value = booking ? booking.status : 'checkedin'
+  document.getElementById('f-remark').value = booking ? (booking.remark||'') : ''
+  document.getElementById('nights-badge').innerHTML = ''
+  updateNights()
+  document.getElementById('booking-modal').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeModal(){
+  document.getElementById('booking-modal').classList.remove('open')
+  document.body.style.overflow = ''
+}
+
+function updateNights(){
+  const ci = document.getElementById('f-checkin').value
+  const co = document.getElementById('f-checkout').value
+  const el = document.getElementById('nights-badge')
+  if(ci && co && co>ci){ el.innerHTML=`<div class="nights-badge">共 ${dayDiff(ci,co)} 晚</div>` }
+  else el.innerHTML=''
+}
+
+function saveBooking(){
+  const roomId = document.getElementById('f-room').value
+  const guestName = document.getElementById('f-guest').value.trim()
+  const checkIn = document.getElementById('f-checkin').value
+  const checkOut = document.getElementById('f-checkout').value
+
+  if(!roomId){ alert('请选择房间'); return }
+  if(!guestName){ alert('请填写客人姓名'); return }
+  if(!checkIn){ alert('请选择入住日期'); return }
+  if(!checkOut){ alert('请选择退房日期'); return }
+  if(checkOut<=checkIn){ alert('退房日期需晚于入住日期'); return }
+
+  const room = ROOM_MAP[roomId]
+  const data = {
+    roomId, roomName:room.name, roomType:room.type,
+    guestName,
+    phone: document.getElementById('f-phone').value,
+    checkIn, checkOut,
+    amount: document.getElementById('f-amount').value,
+    channel: document.getElementById('f-channel').value,
+    status: document.getElementById('f-status').value,
+    remark: document.getElementById('f-remark').value,
+  }
+
+  const bs = getBookings()
+  if(editingId){
+    const idx = bs.findIndex(b=>b.id===editingId)
+    if(idx>-1) bs[idx] = {...bs[idx], ...data}
+  } else {
+    data.id = Date.now().toString()
+    data.createdAt = new Date().toISOString()
+    bs.push(data)
+  }
+  saveBookings(bs)
+  closeModal()
+  renderBookingList()
+  renderCal()
+}
+
+function deleteBooking(){
+  if(!confirm('删除后无法恢复，确定吗？')) return
+  const bs = getBookings().filter(b=>b.id!==editingId)
+  saveBookings(bs)
+  closeModal()
+  renderBookingList()
+  renderCal()
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+renderCal()
+renderStats()
+renderRooms()
+
+// Close modal on overlay click
+document.getElementById('booking-modal').addEventListener('click', function(e){
+  if(e.target===this) closeModal()
+})
+</script>
+
+
+</body></html>
